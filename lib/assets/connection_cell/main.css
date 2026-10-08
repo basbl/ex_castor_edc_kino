@@ -1,0 +1,86 @@
+.castor-cell {
+  border: 1px solid var(--gray-300, #cad5e0);
+  border-radius: 0.5rem;
+  background-color: var(--gray-50, #f8fafc);
+  padding: 0.75rem 1rem;
+  font-family: Inter, system-ui, sans-serif;
+  font-size: 0.875rem;
+  color: var(--gray-800, #1c2a3a);
+}
+
+.castor-header {
+  font-weight: 600;
+  margin-bottom: 0.5rem;
+}
+
+.castor-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  gap: 0.75rem;
+  margin-bottom: 0.5rem;
+}
+
+.castor-field {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.castor-field > span {
+  font-size: 0.75rem;
+  font-weight: 500;
+  color: var(--gray-600, #445668);
+  text-transform: uppercase;
+  letter-spacing: 0.02em;
+}
+
+.castor-grow {
+  flex: 1;
+  min-width: 12rem;
+}
+
+.castor-end {
+  margin-left: auto;
+}
+
+.castor-field input,
+.castor-field select,
+.castor-secret,
+.castor-button {
+  font: inherit;
+  padding: 0.375rem 0.625rem;
+  border: 1px solid var(--gray-300, #cad5e0);
+  border-radius: 0.375rem;
+  background-color: white;
+  color: inherit;
+}
+
+.castor-secret {
+  font-family: "JetBrains Mono", monospace;
+  font-size: 0.8125rem;
+  cursor: pointer;
+}
+
+.castor-button {
+  cursor: pointer;
+  font-weight: 500;
+}
+
+.castor-button:hover,
+.castor-secret:hover {
+  border-color: var(--gray-400, #91a4b7);
+}
+
+.castor-message {
+  font-size: 0.8125rem;
+  color: var(--green-600, #16a34a);
+}
+
+.castor-message.castor-error {
+  color: var(--red-600, #dc2626);
+}
+
+[hidden] {
+  display: none !important;
+}

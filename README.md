@@ -14,6 +14,8 @@ Mix.install([
 
 ## Usage
 
+The **Castor EDC connection** smart cell builds a client: pick the server, and the Livebook secrets that hold your client ID and secret (`CASTOR_EDC_CLIENT_ID` and `CASTOR_EDC_CLIENT_SECRET` by default) or an access token. The credentials never appear in the notebook.
+
 With the package installed, results render by themselves:
 
 ```elixir
