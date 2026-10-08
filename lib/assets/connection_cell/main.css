@@ -72,6 +72,12 @@
   border-color: var(--gray-400, #91a4b7);
 }
 
+.castor-hint {
+  font-size: 0.75rem;
+  color: var(--gray-500, #61758a);
+  margin-bottom: 0.25rem;
+}
+
 .castor-message {
   font-size: 0.8125rem;
   color: var(--green-600, #16a34a);
