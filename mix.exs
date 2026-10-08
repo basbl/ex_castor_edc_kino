@@ -11,6 +11,7 @@ defmodule CastorEDC.Kino.MixProject do
       elixir: "~> 1.20",
       description: "Livebook integration for Castor EDC: smart cells and rich rendering.",
       start_permanent: Mix.env() == :prod,
+      test_coverage: [tool: ExCoveralls],
       dialyzer: [
         plt_local_path: "priv/plts",
         plt_core_path: "priv/plts",
@@ -18,6 +19,16 @@ defmodule CastorEDC.Kino.MixProject do
       ],
       package: package(),
       deps: deps()
+    ]
+  end
+
+  def cli do
+    [
+      preferred_envs: [
+        coveralls: :test,
+        "coveralls.detail": :test,
+        "coveralls.html": :test
+      ]
     ]
   end
 
@@ -39,6 +50,7 @@ defmodule CastorEDC.Kino.MixProject do
   # Run "mix help deps" to learn about dependencies.
   defp deps do
     [
+      {:excoveralls, "~> 0.18.5", only: :test},
       {:styler, "~> 1.12", only: [:dev, :test], runtime: false},
       {:credo, "~> 1.7.19", only: [:dev, :test], runtime: false},
       {:dialyxir, "~> 1.4.8", only: [:dev, :test], runtime: false}
