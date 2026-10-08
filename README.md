@@ -16,6 +16,8 @@ Mix.install([
 
 The **Castor EDC connection** smart cell builds a client: pick the server, and the Livebook secrets that hold your client ID and secret (`CASTOR_EDC_CLIENT_ID` and `CASTOR_EDC_CLIENT_SECRET` by default) or an access token. The credentials never appear in the notebook.
 
+The **Castor EDC study** smart cell then lists the studies a client in the notebook can reach, and binds the ID of the one you pick (`study_id` by default).
+
 With the package installed, results render by themselves:
 
 ```elixir
@@ -34,4 +36,5 @@ Errors show their message, status, code and details, and exports a download for 
 {:ok, export} = CastorEDC.Export.participant_data(client, study_id, unzip: true)
 export
 ```
+Livebook prints `{:ok, result}` and `{:error, error}` as tuples, as it does any tuple: use the `!` functions, or match the value out, to see the views.
 `CastorEDC.Kino.page/1`, `record/1`, `error/1`, `export/1` and `value/1` build the same views, to place them in other layouts.
