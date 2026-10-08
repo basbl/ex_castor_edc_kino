@@ -12,10 +12,15 @@ defmodule CastorEDC.Kino.Binding do
     do: for({name, value} <- binding, is_atom(name), client?(value), into: %{}, do: {Atom.to_string(name), value})
 
   @doc false
-  # The variables holding a study ID: a UUID string.
-  @spec study_ids(Code.binding()) :: [String.t()]
+  # The variables holding a study ID (a UUID string), with their values.
+  @spec study_ids(Code.binding()) :: %{String.t() => String.t()}
   def study_ids(binding) do
-    for {name, value} <- binding, is_atom(name), is_binary(value), value =~ @uuid, do: Atom.to_string(name)
+    for {name, value} <- binding,
+        is_atom(name),
+        is_binary(value),
+        value =~ @uuid,
+        into: %{},
+        do: {Atom.to_string(name), value}
   end
 
   defp client?(%Req.Request{options: %{user_agent: "ex_castor_edc/" <> _version}}), do: true

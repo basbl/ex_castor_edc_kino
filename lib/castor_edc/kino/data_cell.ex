@@ -60,7 +60,7 @@ defmodule CastorEDC.Kino.DataCell do
   @impl true
   def scan_binding(server, binding, _env) do
     clients = binding |> Binding.clients() |> Map.keys() |> Enum.sort()
-    send(server, {:binding, clients, Enum.sort(Binding.study_ids(binding))})
+    send(server, {:binding, clients, binding |> Binding.study_ids() |> Map.keys() |> Enum.sort()})
   end
 
   @impl true

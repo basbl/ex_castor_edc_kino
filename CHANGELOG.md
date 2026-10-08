@@ -15,3 +15,4 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 - A study data smart cell: it loads a study's values as rows (`CastorEDC.Tabular`), or as Explorer or Dux frames when those packages are installed, through the API or a participant data export, and shows them as a table or a tab per frame. `CastorEDC.Kino.data_points/1` and `frames/1` build those views.
 - `CastorEDC.Kino.study/2` shows a study's structure: its visits, forms and fields, then its repeating data and surveys, in the order the study shows them, with a searchable table of every field.
 - A Livebook, `notebook/kino.livemd`, that connects, picks a study and looks around it with the smart cells and views. It uses the checkouts next to it.
+- An export download smart cell: it lists a study's existing exports, newest first, and downloads the one picked, in memory or into a directory. It never queues an export.

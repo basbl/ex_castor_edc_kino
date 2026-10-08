@@ -20,6 +20,8 @@ The **Castor EDC study** smart cell then lists the studies a client in the noteb
 
 The **Castor EDC study data** smart cell loads the study's values: as rows, or as [Explorer](https://github.com/basbl/ex_castor_edc_explorer) or [Dux](https://github.com/basbl/ex_castor_edc_dux) frames when those packages are installed, through the API or a participant data export.
 
+The **Castor EDC export download** smart cell lists the study's existing exports and downloads the one you pick; it never queues an export.
+
 `CastorEDC.Kino.study(client, study_id)` shows the study's structure: its visits, forms and fields, then its repeating data and surveys, in the order the study shows them.
 
 With the package installed, results render by themselves:

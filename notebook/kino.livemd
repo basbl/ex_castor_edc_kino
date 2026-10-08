@@ -70,3 +70,12 @@ This cell loads the study's values: as rows here, or as Explorer or Dux frames w
 
 ```elixir
 ```
+
+## Exports
+
+This cell lists the study's existing exports and downloads the one you pick. It never queues an export: do that with `CastorEDC.Export`.
+
+<!-- livebook:{"attrs":"e30","chunks":null,"kind":"Elixir.CastorEDC.Kino.ExportCell","livebook_object":"smart_cell"} -->
+
+```elixir
+```
