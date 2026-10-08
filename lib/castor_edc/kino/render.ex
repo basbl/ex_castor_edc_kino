@@ -6,6 +6,14 @@ defimpl Kino.Render, for: CastorEDC.Error do
   def to_livebook(error), do: error |> CastorEDC.Kino.error() |> Kino.Render.to_livebook()
 end
 
+defimpl Kino.Render, for: CastorEDC.Export do
+  def to_livebook(export), do: export |> CastorEDC.Kino.export() |> Kino.Render.to_livebook()
+end
+
+defimpl Kino.Render, for: [CastorEDC.MissingValue, CastorEDC.PartialDate] do
+  def to_livebook(value), do: value |> CastorEDC.Kino.value() |> Kino.Render.to_livebook()
+end
+
 # Every struct under CastorEDC.Model, which the generator writes, so the
 # list comes from the library's own modules when this file compiles.
 models =

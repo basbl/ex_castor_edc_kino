@@ -5,8 +5,11 @@ defmodule CastorEDC.KinoTest do
 
   alias CastorEDC.Model.Participant
   alias CastorEDC.Model.Site
+  alias Kino.JS.Live
 
   setup :configure_livebook_bridge
+
+  @moduletag :tmp_dir
 
   @participant %Participant{
     id: "110001",
@@ -24,7 +27,7 @@ defmodule CastorEDC.KinoTest do
       assert %Kino.Layout{type: :tabs, info: %{labels: ["Records", "Raw"]}, items: [table, raw]} =
                CastorEDC.Kino.page(page)
 
-      assert %Kino.JS.Live{} = table
+      assert %Live{} = table
       assert %Kino.Inspect{term: ^page} = raw
 
       data = connect(table)
@@ -92,9 +95,75 @@ defmodule CastorEDC.KinoTest do
     end
   end
 
+  describe "export/1" do
+    @export %CastorEDC.Export{
+      id: "export-1",
+      type: :sites,
+      format: :csv,
+      status: :ready,
+      file_name: "sites.zip",
+      file_size: 2048
+    }
+
+    test "summarises the export, with a download for its file" do
+      assert %Kino.Layout{info: %{labels: ["Export", "Raw"]}, items: [view, _raw]} =
+               CastorEDC.Kino.export(%{@export | data: "PK"})
+
+      assert %Kino.Layout{type: :grid, items: [%Kino.Markdown{text: text}, %Live{module: Kino.Download}]} = view
+      assert text =~ "| Type | sites |"
+      assert text =~ "| Size | 2.0 kB |"
+      refute text =~ "Saved in"
+    end
+
+    test "offers each unzipped file, in memory or on disk", %{tmp_dir: dir} do
+      in_memory = %{@export | files: [{"sites.csv", "Site Id"}, {"meta/info.txt", "x"}]}
+
+      assert %Kino.Layout{items: [%Kino.Layout{items: [_summary, _first, _second]}, _raw]} =
+               CastorEDC.Kino.export(in_memory)
+
+      path = Path.join(dir, "sites.csv")
+      File.write!(path, "Site Id")
+      on_disk = %{@export | path: dir, files: [path], file_size: 3_000_000}
+
+      assert %Kino.Layout{items: [%Kino.Layout{items: [%Kino.Markdown{text: text}, _download]}, _raw]} =
+               CastorEDC.Kino.export(on_disk)
+
+      assert text =~ "| Size | 2.9 MB |"
+      assert text =~ "| Saved in | #{dir} |"
+    end
+
+    test "offers a zip saved to disk, and nothing when there's no file", %{tmp_dir: dir} do
+      zip = Path.join(dir, "sites.zip")
+      File.write!(zip, "PK")
+
+      assert %Kino.Layout{items: [%Kino.Layout{items: [_summary, _download]}, _raw]} =
+               CastorEDC.Kino.export(%{@export | path: zip})
+
+      assert %Kino.Layout{items: [%Kino.Layout{items: [_summary]}, _raw]} =
+               CastorEDC.Kino.export(%{@export | status: :queued, file_size: 10})
+    end
+  end
+
+  describe "value/1" do
+    test "shows missing values and partial dates as text" do
+      assert %Kino.Layout{items: [%Kino.Text{text: "Missing (not applicable), code 96"}, _raw]} =
+               CastorEDC.Kino.value(CastorEDC.MissingValue.new(96))
+
+      assert %Kino.Layout{items: [%Kino.Text{text: "2020-05"}, _raw]} =
+               CastorEDC.Kino.value(%CastorEDC.PartialDate{year: 2020, month: 5})
+    end
+  end
+
   describe "rendering" do
     test "renders pages, records and errors as tabs" do
-      for term <- [%CastorEDC.Page{entries: []}, @participant, %CastorEDC.Error{message: "No"}] do
+      for term <- [
+            %CastorEDC.Page{entries: []},
+            @participant,
+            %CastorEDC.Error{message: "No"},
+            %CastorEDC.Export{id: "export-1"},
+            CastorEDC.MissingValue.new(95),
+            %CastorEDC.PartialDate{year: 2020}
+          ] do
         assert %{type: :tabs, labels: [_view, "Raw"]} = Kino.Render.to_livebook(term)
       end
     end

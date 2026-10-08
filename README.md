@@ -26,5 +26,10 @@ CastorEDC.Participants.list_participants!(client, study_id)
 CastorEDC.Participants.get_participant!(client, study_id, "110001")
 ```
 
-Errors show their message, status, code and details.
-`CastorEDC.Kino.page/1`, `record/1` and `error/1` build the same views, to place them in other layouts.
+Errors show their message, status, code and details, and exports a download for each file:
+
+```elixir
+{:ok, export} = CastorEDC.Export.participant_data(client, study_id, unzip: true)
+export
+```
+`CastorEDC.Kino.page/1`, `record/1`, `error/1`, `export/1` and `value/1` build the same views, to place them in other layouts.

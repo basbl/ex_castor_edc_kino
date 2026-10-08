@@ -8,6 +8,8 @@ defmodule CastorEDC.Kino do
     * a `CastorEDC.Page` as a table of its records
     * a record (a struct under `CastorEDC.Model`) as a tree
     * a `CastorEDC.Error` as its message and details
+    * a `CastorEDC.Export` as a summary with a download per file
+    * a `CastorEDC.MissingValue` or `CastorEDC.PartialDate` as text
 
   Each keeps the raw term in a tab next to it. The functions below build
   the same views, to use them inside other layouts.
@@ -16,7 +18,10 @@ defmodule CastorEDC.Kino do
   """
 
   alias CastorEDC.Error
+  alias CastorEDC.Export
+  alias CastorEDC.MissingValue
   alias CastorEDC.Page
+  alias CastorEDC.PartialDate
 
   @doc """
   A page of records as a table, with its page counters as the table's
@@ -67,6 +72,73 @@ defmodule CastorEDC.Kino do
     markdown = sections |> Enum.reject(&(&1 == "")) |> Enum.join("\n\n")
     Kino.Layout.tabs(Error: Kino.Markdown.new(markdown), Raw: Kino.Inspect.new(error))
   end
+
+  @doc """
+  An export as its type, format, status and size, with a download button
+  for its file, or for each file when it was unzipped, and the raw export
+  in a second tab.
+
+  Files on disk are read when their button is pressed, not before.
+  """
+  @spec export(Export.t()) :: Kino.Layout.t()
+  def export(%Export{} = export) do
+    summary =
+      [
+        {"Type", export.type},
+        {"Format", export.format},
+        {"Status", export.status},
+        {"File", export.file_name},
+        {"Size", export.file_size && size(export.file_size)},
+        {"Expires", export.expires_on},
+        {"Saved in", export.path}
+      ]
+      |> Enum.reject(fn {_label, value} -> is_nil(value) end)
+      |> Enum.map(fn {label, value} -> "| #{label} | #{escape(to_string(value))} |" end)
+
+    markdown = Kino.Markdown.new(Enum.join(["| | |", "| --- | --- |" | summary], "\n"))
+    view = Kino.Layout.grid([markdown | downloads(export)])
+
+    Kino.Layout.tabs(Export: view, Raw: Kino.Inspect.new(export))
+  end
+
+  @doc """
+  A value marked missing, or a partial date, as text, and the raw value in
+  a second tab.
+  """
+  @spec value(MissingValue.t() | PartialDate.t()) :: Kino.Layout.t()
+  def value(%MissingValue{code: code, reason: reason} = value) do
+    text = "Missing (#{reason |> Atom.to_string() |> String.replace("_", " ")}), code #{code}"
+    Kino.Layout.tabs(Value: Kino.Text.new(text), Raw: Kino.Inspect.new(value))
+  end
+
+  def value(%PartialDate{} = value) do
+    Kino.Layout.tabs(Value: Kino.Text.new(PartialDate.to_iso8601(value)), Raw: Kino.Inspect.new(value))
+  end
+
+  defp downloads(%Export{files: [_file | _more] = files, path: path}) do
+    Enum.map(files, fn
+      {name, contents} -> Kino.Download.new(fn -> contents end, filename: Path.basename(name), label: name)
+      file -> Kino.Download.new(fn -> File.read!(file) end, filename: Path.basename(file), label: relative(file, path))
+    end)
+  end
+
+  defp downloads(%Export{data: data} = export) when is_binary(data),
+    do: [Kino.Download.new(fn -> data end, filename: export.file_name || "#{export.id}.zip")]
+
+  defp downloads(%Export{path: path}) when is_binary(path) do
+    if File.regular?(path),
+      do: [Kino.Download.new(fn -> File.read!(path) end, filename: Path.basename(path))],
+      else: []
+  end
+
+  defp downloads(_export), do: []
+
+  defp relative(file, nil), do: Path.basename(file)
+  defp relative(file, dir), do: Path.relative_to(file, dir)
+
+  defp size(bytes) when bytes >= 1_048_576, do: "#{Float.round(bytes / 1_048_576, 1)} MB"
+  defp size(bytes) when bytes >= 1024, do: "#{Float.round(bytes / 1024, 1)} kB"
+  defp size(bytes), do: "#{bytes} bytes"
 
   defp facts(error) do
     rows =
