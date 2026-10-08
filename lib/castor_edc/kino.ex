@@ -43,6 +43,32 @@ defmodule CastorEDC.Kino do
   end
 
   @doc """
+  Rows from `CastorEDC.Tabular.data_points/3`, in the long format, as a
+  table with its columns in the order the rows describe: whose value it
+  is, where it was collected, the field, then the value.
+  """
+  @spec data_points(Enumerable.t()) :: Kino.JS.Live.t()
+  def data_points(rows) do
+    keys = ~w(participant_id site_id source instance_id parent_id field_id variable_name value raw_value updated_on)
+    table = Enum.map(rows, fn row -> Map.new(row, fn {key, value} -> {to_string(key), data_cell(value)} end) end)
+    Kino.DataTable.new(table, name: "Data points", keys: keys)
+  end
+
+  @doc """
+  The frames of a study, as the Explorer and Dux packages give them in the
+  wide format (`%{study: frame, repeating_data: %{name => frame},
+  surveys: %{name => frame}}`), in a tab each.
+  """
+  @spec frames(%{study: term(), repeating_data: map(), surveys: map()}) :: Kino.Layout.t()
+  def frames(%{study: study, repeating_data: repeating_data, surveys: surveys}) do
+    tabs =
+      [{"Study", study}] ++
+        Enum.sort_by(repeating_data, &elem(&1, 0)) ++ Enum.sort_by(surveys, &elem(&1, 0))
+
+    Kino.Layout.tabs(tabs)
+  end
+
+  @doc """
   A record as a tree, without its `extra` field when that's empty, and
   the raw record in a second tab.
   """
@@ -139,6 +165,15 @@ defmodule CastorEDC.Kino do
   defp size(bytes) when bytes >= 1_048_576, do: "#{Float.round(bytes / 1_048_576, 1)} MB"
   defp size(bytes) when bytes >= 1024, do: "#{Float.round(bytes / 1024, 1)} kB"
   defp size(bytes), do: "#{bytes} bytes"
+
+  defp data_cell(%MissingValue{} = value), do: "Missing (#{value.code})"
+  defp data_cell(%PartialDate{} = value), do: PartialDate.to_iso8601(value)
+  defp data_cell(value) when is_atom(value) and not is_nil(value) and not is_boolean(value), do: Atom.to_string(value)
+
+  defp data_cell(value) when is_tuple(value) or is_list(value) or (is_map(value) and not is_struct(value)),
+    do: inspect(value)
+
+  defp data_cell(value), do: value
 
   defp facts(error) do
     rows =

@@ -7,6 +7,7 @@ defmodule CastorEDC.Kino.Application do
   def start(_type, _args) do
     Kino.SmartCell.register(CastorEDC.Kino.ConnectionCell)
     Kino.SmartCell.register(CastorEDC.Kino.StudyCell)
+    Kino.SmartCell.register(CastorEDC.Kino.DataCell)
 
     Supervisor.start_link([], strategy: :one_for_one, name: CastorEDC.Kino.Supervisor)
   end

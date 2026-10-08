@@ -18,6 +18,8 @@ The **Castor EDC connection** smart cell builds a client: pick the server, and t
 
 The **Castor EDC study** smart cell then lists the studies a client in the notebook can reach, and binds the ID of the one you pick (`study_id` by default).
 
+The **Castor EDC study data** smart cell loads the study's values: as rows, or as [Explorer](https://github.com/basbl/ex_castor_edc_explorer) or [Dux](https://github.com/basbl/ex_castor_edc_dux) frames when those packages are installed, through the API or a participant data export.
+
 With the package installed, results render by themselves:
 
 ```elixir
@@ -37,4 +39,4 @@ Errors show their message, status, code and details, and exports a download for 
 export
 ```
 Livebook prints `{:ok, result}` and `{:error, error}` as tuples, as it does any tuple: use the `!` functions, or match the value out, to see the views.
-`CastorEDC.Kino.page/1`, `record/1`, `error/1`, `export/1` and `value/1` build the same views, to place them in other layouts.
+`CastorEDC.Kino.page/1`, `record/1`, `error/1`, `export/1`, `value/1`, `data_points/1` and `frames/1` build the same views, to place them in other layouts.

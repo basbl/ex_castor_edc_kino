@@ -7,6 +7,8 @@ defmodule CastorEDC.Kino.StudyCell do
   use Kino.JS.Live
   use Kino.SmartCell, name: "Castor EDC study"
 
+  alias CastorEDC.Kino.Binding
+
   @fields ~w(client study_id study_name variable)
 
   @impl true
@@ -78,8 +80,7 @@ defmodule CastorEDC.Kino.StudyCell do
 
   @impl true
   def scan_binding(server, binding, _env) do
-    clients = for {name, value} <- binding, is_atom(name), client?(value), into: %{}, do: {Atom.to_string(name), value}
-    send(server, {:clients, clients})
+    send(server, {:clients, Binding.clients(binding)})
   end
 
   @impl true
@@ -98,10 +99,6 @@ defmodule CastorEDC.Kino.StudyCell do
 
     if attrs["study_name"] in [nil, ""], do: source, else: "# #{attrs["study_name"]}\n" <> source
   end
-
-  # The clients CastorEDC.new/1 builds carry the library's user agent.
-  defp client?(%Req.Request{options: %{user_agent: "ex_castor_edc/" <> _version}}), do: true
-  defp client?(_value), do: false
 
   defp list_studies(ctx) do
     name = ctx.assigns.fields["client"]

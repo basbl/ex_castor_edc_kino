@@ -95,6 +95,63 @@ defmodule CastorEDC.KinoTest do
     end
   end
 
+  describe "data_points/1" do
+    test "shows long rows in the order they describe, with readable values" do
+      rows = [
+        %{
+          participant_id: "P1",
+          site_id: "site-1",
+          source: :study,
+          instance_id: nil,
+          parent_id: nil,
+          field_id: "f-1",
+          variable_name: "weight",
+          value: CastorEDC.MissingValue.new(96),
+          raw_value: "##USER_MISSING_96##",
+          updated_on: ~N[2026-10-07 21:49:55]
+        },
+        %{
+          participant_id: "P1",
+          site_id: "site-1",
+          source: :survey,
+          instance_id: "si-1",
+          parent_id: "s-1",
+          field_id: "f-2",
+          variable_name: "visit",
+          value: %CastorEDC.PartialDate{year: 2020, month: 5},
+          raw_value: "00-05-2020",
+          updated_on: nil
+        }
+      ]
+
+      table = CastorEDC.Kino.data_points(rows)
+      data = connect(table)
+      labels = Enum.map(data.content.columns, & &1.label)
+
+      assert labels ==
+               ~w(participant_id site_id source instance_id parent_id field_id variable_name value raw_value updated_on)
+
+      [first, second] = Enum.map(data.content.data, &Map.new(Enum.zip(labels, &1)))
+      assert %{"source" => "study", "value" => "Missing (96)"} = first
+      assert %{"source" => "survey", "value" => "2020-05"} = second
+    end
+  end
+
+  describe "frames/1" do
+    test "puts the study's frame first, then the repeating data and surveys by name" do
+      frames = %{
+        study: "study frame",
+        repeating_data: %{"Medication" => "m", "Blood pressure" => "b"},
+        surveys: %{"GAD-7" => "g"}
+      }
+
+      assert %Kino.Layout{type: :tabs, info: %{labels: ["Study", "Blood pressure", "Medication", "GAD-7"]}, items: items} =
+               CastorEDC.Kino.frames(frames)
+
+      assert items == ["study frame", "b", "m", "g"]
+    end
+  end
+
   describe "export/1" do
     @export %CastorEDC.Export{
       id: "export-1",
