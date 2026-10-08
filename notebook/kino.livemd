@@ -1,0 +1,72 @@
+# Castor EDC in Livebook
+
+```elixir
+# The checkout this notebook is in, and ex_castor_edc checked out next to it
+# (or where CASTOR_EDC_PATH says). Outside a checkout, use
+# {:ex_castor_edc_kino, "~> 0.1.0"} instead.
+castor_edc = System.get_env("CASTOR_EDC_PATH", Path.expand("../../ex_castor_edc", __DIR__))
+
+Mix.install([
+  {:ex_castor_edc_kino, path: Path.expand("..", __DIR__)},
+  {:ex_castor_edc, path: castor_edc, override: true}
+])
+```
+
+## Introduction
+
+This notebook connects to Castor EDC, picks a study and looks around it, without writing any setup code.
+Everything here only reads: nothing in it changes the study.
+
+Add your API credentials as Livebook secrets first: `CASTOR_EDC_CLIENT_ID` and `CASTOR_EDC_CLIENT_SECRET` (create them on your [account settings page](https://data.castoredc.com/account/settings)).
+The connection cell reads them from there, so they never appear in the notebook.
+
+## Connecting
+
+Pick the server your studies are on, and test the connection.
+
+<!-- livebook:{"attrs":"eyJ2YXJpYWJsZSI6ImNsaWVudCIsInNlcnZlciI6Imh0dHBzOi8vZGF0YS5jYXN0b3JlZGMuY29tIiwiY3VzdG9tX3NlcnZlciI6IiIsImF1dGgiOiJjcmVkZW50aWFscyIsImNsaWVudF9pZF9zZWNyZXQiOiJDQVNUT1JfRURDX0NMSUVOVF9JRCIsImNsaWVudF9zZWNyZXRfc2VjcmV0IjoiQ0FTVE9SX0VEQ19DTElFTlRfU0VDUkVUIiwiYWNjZXNzX3Rva2VuX3NlY3JldCI6IkNBU1RPUl9FRENfQUNDRVNTX1RPS0VOIn0","chunks":null,"kind":"Elixir.CastorEDC.Kino.ConnectionCell","livebook_object":"smart_cell"} -->
+
+```elixir
+client =
+  CastorEDC.new(
+    client_id: System.fetch_env!("LB_CASTOR_EDC_CLIENT_ID"),
+    client_secret: System.fetch_env!("LB_CASTOR_EDC_CLIENT_SECRET"),
+    base_url: "https://data.castoredc.com"
+  )
+```
+
+## Picking a study
+
+Once the client exists, this cell lists the studies it can reach.
+
+<!-- livebook:{"attrs":"eyJjbGllbnQiOiJjbGllbnQiLCJzdHVkeV9pZCI6IiIsInN0dWR5X25hbWUiOiIiLCJ2YXJpYWJsZSI6InN0dWR5X2lkIn0","chunks":null,"kind":"Elixir.CastorEDC.Kino.StudyCell","livebook_object":"smart_cell"} -->
+
+```elixir
+```
+
+## The study's structure
+
+```elixir
+CastorEDC.Kino.study(client, study_id)
+```
+
+## Participants
+
+Pages render as tables, and records as trees.
+
+```elixir
+participants = CastorEDC.Participants.list_participants!(client, study_id)
+```
+
+```elixir
+hd(participants.entries)
+```
+
+## Collected data
+
+This cell loads the study's values: as rows here, or as Explorer or Dux frames when the `ex_castor_edc_explorer` or `ex_castor_edc_dux` package is installed.
+
+<!-- livebook:{"attrs":"eyJ2YXJpYWJsZSI6ImRhdGEiLCJjbGllbnQiOiJjbGllbnQiLCJzdHVkeSI6InN0dWR5X2lkIiwibGlicmFyeSI6InJvd3MiLCJzb3VyY2UiOiJhcGkiLCJmb3JtYXQiOiJsb25nIiwic291cmNlcyI6WyJzdHVkeSIsInJlcGVhdGluZ19kYXRhIiwic3VydmV5Il0sIm1pc3NpbmdfY29sdW1ucyI6ZmFsc2V9","chunks":null,"kind":"Elixir.CastorEDC.Kino.DataCell","livebook_object":"smart_cell"} -->
+
+```elixir
+```

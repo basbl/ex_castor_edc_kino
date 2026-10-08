@@ -58,7 +58,7 @@ defmodule CastorEDC.Kino.MixProject do
       main: "CastorEDC.Kino",
       source_ref: "v#{@version}",
       source_url: @source_url,
-      extras: ["README.md", "CHANGELOG.md"]
+      extras: ["README.md", "notebook/kino.livemd", "CHANGELOG.md"]
     ]
   end
 
