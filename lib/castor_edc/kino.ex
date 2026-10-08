@@ -11,6 +11,8 @@ defmodule CastorEDC.Kino do
     * a `CastorEDC.Export` as a summary with a download per file
     * a `CastorEDC.MissingValue` or `CastorEDC.PartialDate` as text
 
+  `study/2` shows a study's structure.
+
   Each keeps the raw term in a tab next to it. The functions below build
   the same views, to use them inside other layouts.
 
@@ -40,6 +42,80 @@ defmodule CastorEDC.Kino do
         else: Kino.DataTable.new(rows, name: name, keys: keys(rows))
 
     Kino.Layout.tabs(Records: table, Raw: Kino.Inspect.new(page))
+  end
+
+  @doc """
+  A study's structure: its visits, forms and fields, then its repeating
+  data and surveys, in the order the study shows them, and in a second
+  tab a table of every field that holds values.
+
+  Each field shows its variable name, label and type, and the option
+  group of an option field. Fields that lay out a form are left out, as
+  `CastorEDC.Tabular.schema/2` leaves them out.
+
+  Raises `CastorEDC.Error` when a request fails, so a notebook shows the
+  error rather than a tuple.
+  """
+  @spec study(CastorEDC.client(), String.t()) :: Kino.Layout.t()
+  def study(client, study_id) do
+    columns =
+      case CastorEDC.Tabular.schema(client, study_id) do
+        {:ok, schema} -> schema |> Map.values() |> Enum.sort_by(& &1.position)
+        {:error, error} -> raise error
+      end
+
+    Kino.Layout.tabs(Structure: Kino.Markdown.new(outline(columns)), Fields: fields_table(columns))
+  end
+
+  @headings [study: "Visits", repeating_data: "Repeating data", survey: "Surveys"]
+
+  defp outline([]), do: "_The study has no fields that hold values._"
+
+  defp outline(columns) do
+    columns
+    |> Enum.chunk_by(& &1.context)
+    |> Enum.map_join("\n\n", &section/1)
+  end
+
+  # A context: the visits, the repeating data or the surveys.
+  defp section([%{context: context} | _more] = columns) do
+    "### #{Keyword.get(@headings, context, "Elsewhere")}\n\n" <>
+      (columns |> Enum.chunk_by(& &1.parent_id) |> Enum.map_join("\n", &parent/1))
+  end
+
+  # A visit, repeating data or survey, and its forms.
+  defp parent([first | _more] = columns) do
+    "- **#{escape(first.parent_name || "Unnamed")}**\n" <>
+      (columns |> Enum.chunk_by(& &1.form_id) |> Enum.map_join("\n", &form/1))
+  end
+
+  defp form([first | _more] = columns) do
+    "  - #{escape(first.form_name || "Form")}\n" <> Enum.map_join(columns, "\n", &"    - #{field_line(&1)}")
+  end
+
+  defp field_line(column) do
+    label = if column.label in [nil, ""], do: "", else: " #{escape(column.label)}"
+    group = if column.option_group, do: ", #{escape(column.option_group.name || column.option_group.id)}", else: ""
+    "`#{column.variable_name || column.field_id}`#{label} (#{column.field_type}#{group})"
+  end
+
+  defp fields_table(columns) do
+    rows =
+      for column <- columns do
+        %{
+          "variable_name" => column.variable_name,
+          "label" => column.label,
+          "field_type" => column.field_type,
+          "context" => column.context && Atom.to_string(column.context),
+          "parent" => column.parent_name,
+          "form" => column.form_name,
+          "option_group" => column.option_group && column.option_group.name,
+          "field_id" => column.field_id
+        }
+      end
+
+    keys = ~w(variable_name label field_type context parent form option_group field_id)
+    Kino.DataTable.new(rows, name: "Fields", keys: keys)
   end
 
   @doc """
