@@ -1,15 +1,21 @@
 # Castor EDC in Livebook
 
 ```elixir
-# The checkout this notebook is in, and ex_castor_edc checked out next to it
-# (or where CASTOR_EDC_PATH says). Outside a checkout, use
-# {:ex_castor_edc_kino, "~> 0.1.0"} instead.
-castor_edc = System.get_env("CASTOR_EDC_PATH", Path.expand("../../ex_castor_edc", __DIR__))
+# The published packages, or the checkouts CASTOR_EDC_KINO_PATH and
+# CASTOR_EDC_PATH name.
+kino =
+  case System.get_env("CASTOR_EDC_KINO_PATH") do
+    nil -> {:ex_castor_edc_kino, "~> 0.1.0"}
+    path -> {:ex_castor_edc_kino, path: path}
+  end
 
-Mix.install([
-  {:ex_castor_edc_kino, path: Path.expand("..", __DIR__)},
-  {:ex_castor_edc, path: castor_edc, override: true}
-])
+castor_edc =
+  case System.get_env("CASTOR_EDC_PATH") do
+    nil -> []
+    path -> [{:ex_castor_edc, path: path, override: true}]
+  end
+
+Mix.install([kino | castor_edc])
 ```
 
 ## Introduction
@@ -64,7 +70,7 @@ hd(participants.entries)
 
 ## Collected data
 
-This cell loads the study's values: as rows here, or as Explorer or Dux frames when the `ex_castor_edc_explorer` or `ex_castor_edc_dux` package is installed.
+This cell loads the study's values, as rows.
 
 <!-- livebook:{"attrs":"eyJ2YXJpYWJsZSI6ImRhdGEiLCJjbGllbnQiOiJjbGllbnQiLCJzdHVkeSI6InN0dWR5X2lkIiwibGlicmFyeSI6InJvd3MiLCJzb3VyY2UiOiJhcGkiLCJmb3JtYXQiOiJsb25nIiwic291cmNlcyI6WyJzdHVkeSIsInJlcGVhdGluZ19kYXRhIiwic3VydmV5Il0sIm1pc3NpbmdfY29sdW1ucyI6ZmFsc2V9","chunks":null,"kind":"Elixir.CastorEDC.Kino.DataCell","livebook_object":"smart_cell"} -->
 

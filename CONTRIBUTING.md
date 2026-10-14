@@ -29,6 +29,12 @@ $ mix coveralls   # tests with coverage, failing below the threshold in coverall
 
 CI runs `mix compile --warnings-as-errors`, `mix coveralls` and `mix quality`.
 
+## Notebook
+
+`notebook/kino.livemd` installs the published packages.
+To run it against your checkouts, start Livebook with `CASTOR_EDC_KINO_PATH` set to this checkout, and `CASTOR_EDC_PATH` to the core's if you want that too.
+Livebook saves your server and study into the notebook when you save it there; commit only the changes you meant.
+
 ## Commits
 
 Each commit is one logical change that leaves the build green.
