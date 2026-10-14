@@ -4,7 +4,7 @@ All notable changes to this project are documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## Unreleased
+## [0.1.0] - Unreleased
 
 ### Added
 
@@ -21,3 +21,5 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 - A Livebook, `notebook/kino.livemd`, that connects, picks a study and looks around it with the smart cells and views.
 - An export download smart cell: it lists a study's existing exports, newest first, and downloads the one picked, in memory or into a directory.
   It never queues an export.
+
+[0.1.0]: https://hex.pm/packages/ex_castor_edc_kino/0.1.0

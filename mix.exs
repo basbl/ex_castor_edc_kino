@@ -1,7 +1,7 @@
 defmodule CastorEDC.Kino.MixProject do
   use Mix.Project
 
-  @version "0.1.0-dev"
+  @version "0.1.0"
   @source_url "https://github.com/basbl/ex_castor_edc_kino"
 
   def project do
