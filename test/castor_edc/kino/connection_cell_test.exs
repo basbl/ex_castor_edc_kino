@@ -65,6 +65,27 @@ defmodule CastorEDC.Kino.ConnectionCellTest do
     assert source =~ ~s{base_url: "https://us.castoredc.com"}
   end
 
+  test "warns when the client ID and the client secret come from the same secret" do
+    {kino, _source} = start_smart_cell!(ConnectionCell, %{})
+    assert %{warning: nil} = connect(kino)
+
+    push_event(kino, "update_field", %{"field" => "client_id_secret", "value" => "CASTOR_EDC_CLIENT_SECRET"})
+
+    warning =
+      "The client ID and the client secret both come from the secret CASTOR_EDC_CLIENT_SECRET; " <>
+        "pick the secret that holds each."
+
+    assert_broadcast_event(kino, "update", %{"warning" => ^warning})
+    assert %{warning: ^warning} = connect(kino)
+
+    System.put_env("LB_CASTOR_EDC_CLIENT_SECRET", "secret")
+    push_event(kino, "test", %{})
+    assert_broadcast_event(kino, "test", %{"ok" => false, "message" => ^warning})
+
+    push_event(kino, "update_field", %{"field" => "auth", "value" => "token"})
+    assert_broadcast_event(kino, "update", %{"warning" => nil})
+  end
+
   describe "testing the connection" do
     test "lists the studies the secrets give access to" do
       System.put_env("LB_CASTOR_EDC_CLIENT_ID", "id")

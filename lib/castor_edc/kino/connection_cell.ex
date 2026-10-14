@@ -33,7 +33,8 @@ defmodule CastorEDC.Kino.ConnectionCell do
 
   @impl true
   def handle_connect(ctx) do
-    {:ok, %{fields: ctx.assigns.fields, servers: @servers, test: ctx.assigns.test}, ctx}
+    fields = ctx.assigns.fields
+    {:ok, %{fields: fields, servers: @servers, test: ctx.assigns.test, warning: warning(fields)}, ctx}
   end
 
   @impl true
@@ -43,7 +44,7 @@ defmodule CastorEDC.Kino.ConnectionCell do
         do: ctx.assigns.fields,
         else: Map.put(ctx.assigns.fields, field, value)
 
-    broadcast_event(ctx, "update", %{"fields" => fields})
+    broadcast_event(ctx, "update", %{"fields" => fields, "warning" => warning(fields)})
     {:noreply, assign(ctx, fields: fields, test: nil)}
   end
 
@@ -79,9 +80,25 @@ defmodule CastorEDC.Kino.ConnectionCell do
   defp server(%{"server" => "custom", "custom_server" => url}), do: String.trim(url)
   defp server(%{"server" => url}), do: url
 
+  # Picking the same secret for the client ID and the secret is an easy
+  # slip in the secret picker, and the API only says the credentials are
+  # wrong.
+  defp warning(%{"auth" => "credentials", "client_id_secret" => same, "client_secret_secret" => same}) do
+    "The client ID and the client secret both come from the secret #{same}; pick the secret that holds each."
+  end
+
+  defp warning(_fields), do: nil
+
+  defp test(fields) do
+    case warning(fields) do
+      nil -> list_studies(fields)
+      warning -> %{"ok" => false, "message" => warning}
+    end
+  end
+
   # Builds the client the source would, from the secrets this notebook has,
   # and lists its studies.
-  defp test(fields) do
+  defp list_studies(fields) do
     secrets = credentials(fields)
 
     case Enum.reject(secrets, fn {_key, secret} -> System.get_env("LB_" <> secret) end) do
