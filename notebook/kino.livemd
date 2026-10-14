@@ -1,21 +1,15 @@
 # Castor EDC in Livebook
 
 ```elixir
-# The published packages, or the checkouts CASTOR_EDC_KINO_PATH and
-# CASTOR_EDC_PATH name.
-kino =
-  case System.get_env("CASTOR_EDC_KINO_PATH") do
-    nil -> {:ex_castor_edc_kino, "~> 0.1.0"}
-    path -> {:ex_castor_edc_kino, path: path}
-  end
+# To use checkouts instead of the published packages, set
+# CASTOR_EDC_KINO_PATH, and CASTOR_EDC_PATH for the core.
+kino = System.get_env("CASTOR_EDC_KINO_PATH")
+core = System.get_env("CASTOR_EDC_PATH")
 
-castor_edc =
-  case System.get_env("CASTOR_EDC_PATH") do
-    nil -> []
-    path -> [{:ex_castor_edc, path: path, override: true}]
-  end
-
-Mix.install([kino | castor_edc])
+Mix.install(
+  [if(kino, do: {:ex_castor_edc_kino, path: kino}, else: {:ex_castor_edc_kino, "~> 0.1.0"})] ++
+    if(core, do: [{:ex_castor_edc, path: core, override: true}], else: [])
+)
 ```
 
 ## Introduction
@@ -23,8 +17,9 @@ Mix.install([kino | castor_edc])
 This notebook connects to Castor EDC, picks a study and looks around it, without writing any setup code.
 Everything here only reads: nothing in it changes the study.
 
-Add your API credentials as Livebook secrets first: `CASTOR_EDC_CLIENT_ID` and `CASTOR_EDC_CLIENT_SECRET` (create them on your [account settings page](https://data.castoredc.com/account/settings)).
-The connection cell reads them from there, so they never appear in the notebook.
+Add your API credentials as Livebook secrets first, `CASTOR_EDC_CLIENT_ID` and `CASTOR_EDC_CLIENT_SECRET`, in the notebook's Secrets panel (the key icon in the sidebar).
+You create the credentials on your [account settings page](https://data.castoredc.com/account/settings).
+The connection cell reads them from the secrets, so they never appear in the notebook.
 
 ## Connecting
 
@@ -52,6 +47,8 @@ Once the client exists, this cell lists the studies it can reach.
 
 ## The study's structure
 
+`CastorEDC.Kino.study/2` shows the study's visits, forms and fields, then its repeating data and surveys.
+
 ```elixir
 CastorEDC.Kino.study(client, study_id)
 ```
@@ -65,21 +62,34 @@ participants = CastorEDC.Participants.list_participants!(client, study_id)
 ```
 
 ```elixir
-hd(participants.entries)
+List.first(participants.entries)
 ```
 
 ## Collected data
 
 This cell loads the study's values, as rows.
+It fetches every value the study has collected, which takes a while on a large study.
 
 <!-- livebook:{"attrs":"eyJ2YXJpYWJsZSI6ImRhdGEiLCJjbGllbnQiOiJjbGllbnQiLCJzdHVkeSI6InN0dWR5X2lkIiwibGlicmFyeSI6InJvd3MiLCJzb3VyY2UiOiJhcGkiLCJmb3JtYXQiOiJsb25nIiwic291cmNlcyI6WyJzdHVkeSIsInJlcGVhdGluZ19kYXRhIiwic3VydmV5Il0sIm1pc3NpbmdfY29sdW1ucyI6ZmFsc2V9","chunks":null,"kind":"Elixir.CastorEDC.Kino.DataCell","livebook_object":"smart_cell"} -->
 
 ```elixir
 ```
 
+## Errors
+
+Livebook shows a result tuple as it is, so `{:ok, page}` and `{:error, error}` print as plain terms.
+The views appear for the value inside, so the `!` functions, which return it or raise, show them directly.
+Match an error out to see its view: the message, status, code and details the API sent.
+
+```elixir
+{:error, error} = CastorEDC.Participants.get_participant(client, study_id, "999999")
+error
+```
+
 ## Exports
 
-This cell lists the study's existing exports and downloads the one you pick. It never queues an export: do that with `CastorEDC.Export`.
+This cell lists the study's existing exports and downloads the one you pick.
+It never queues an export: do that with `CastorEDC.Export`.
 
 <!-- livebook:{"attrs":"e30","chunks":null,"kind":"Elixir.CastorEDC.Kino.ExportCell","livebook_object":"smart_cell"} -->
 
