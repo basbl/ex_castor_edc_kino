@@ -131,9 +131,9 @@ defmodule CastorEDC.Kino do
   end
 
   @doc """
-  The frames of a study, as the Explorer and Dux packages give them in the
-  wide format (`%{study: frame, repeating_data: %{name => frame},
-  surveys: %{name => frame}}`), in a tab each.
+  A study's dataframes in the wide format (`%{study: frame,
+  repeating_data: %{name => frame}, surveys: %{name => frame}}`), in a tab
+  each.
   """
   @spec frames(%{study: term(), repeating_data: map(), surveys: map()}) :: Kino.Layout.t()
   def frames(%{study: study, repeating_data: repeating_data, surveys: surveys}) do
