@@ -1,5 +1,7 @@
 # CastorEDC.Kino
 
+[![Package](https://img.shields.io/hexpm/v/ex_castor_edc_kino.svg)](https://hex.pm/packages/ex_castor_edc_kino) [![Documentation](http://img.shields.io/badge/hex.pm-docs-green.svg?style=flat)](https://hexdocs.pm/ex_castor_edc_kino) ![CI](https://github.com/basbl/ex_castor_edc_kino/actions/workflows/ci.yml/badge.svg)
+
 [Livebook](https://livebook.dev) integration for [ex_castor_edc](https://hexdocs.pm/ex_castor_edc): smart cells to connect to Castor EDC, pick a study and load its data, and views that show the library's results as tables and trees instead of raw terms.
 
 It only reads: nothing in it changes a study.
