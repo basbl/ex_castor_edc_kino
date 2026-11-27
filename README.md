@@ -10,7 +10,7 @@ It only reads: nothing in it changes a study.
 
 ```elixir
 Mix.install([
-  {:ex_castor_edc_kino, "~> 0.1.0"}
+  {:ex_castor_edc_kino, "~> 0.2.0"}
 ])
 ```
 
