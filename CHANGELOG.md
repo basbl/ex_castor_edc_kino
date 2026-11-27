@@ -6,6 +6,11 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 ## Unreleased
 
+### Added
+
+- The connection smart cell takes the time zone of a server of your own, which the API's times without a zone are in, and passes it to `CastorEDC.new/1` as `:time_zone`; it warns about a zone it doesn't know.
+  Castor EDC's own servers don't need one, as the client knows their zones.
+
 ### Changed
 
 - Builds on ex_castor_edc 1.0 (`~> 1.0`) instead of its release candidate.

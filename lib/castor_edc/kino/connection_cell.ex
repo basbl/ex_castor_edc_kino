@@ -19,6 +19,7 @@ defmodule CastorEDC.Kino.ConnectionCell do
     "variable" => "client",
     "server" => "https://data.castoredc.com",
     "custom_server" => "",
+    "time_zone" => "",
     "auth" => "credentials",
     "client_id_secret" => "CASTOR_EDC_CLIENT_ID",
     "client_secret_secret" => "CASTOR_EDC_CLIENT_SECRET",
@@ -59,7 +60,9 @@ defmodule CastorEDC.Kino.ConnectionCell do
 
   @impl true
   def to_source(attrs) do
-    options = Enum.map(credentials(attrs), fn {key, secret} -> {key, fetch_env(secret)} end) ++ [base_url: server(attrs)]
+    options =
+      Enum.map(credentials(attrs), fn {key, secret} -> {key, fetch_env(secret)} end) ++
+        [base_url: server(attrs)] ++ time_zone(attrs)
 
     quote_result =
       quote do
@@ -80,6 +83,17 @@ defmodule CastorEDC.Kino.ConnectionCell do
   defp server(%{"server" => "custom", "custom_server" => url}), do: String.trim(url)
   defp server(%{"server" => url}), do: url
 
+  # The API's times without a zone are in the server's; the client knows
+  # the zone of Castor EDC's own servers, so it's only asked for another.
+  defp time_zone(%{"server" => "custom", "time_zone" => zone}) do
+    case String.trim(zone || "") do
+      "" -> []
+      zone -> [time_zone: zone]
+    end
+  end
+
+  defp time_zone(_attrs), do: []
+
   # Picking the same secret for the client ID and the secret is an easy
   # slip in the secret picker, and the API only says the credentials are
   # wrong.
@@ -87,7 +101,14 @@ defmodule CastorEDC.Kino.ConnectionCell do
     "The client ID and the client secret both come from the secret #{same}; pick the secret that holds each."
   end
 
-  defp warning(_fields), do: nil
+  defp warning(fields) do
+    with [time_zone: zone] <- time_zone(fields),
+         {:error, _reason} <- DateTime.now(zone, Tz.TimeZoneDatabase) do
+      "#{zone} isn't a time zone; give one such as Europe/Amsterdam."
+    else
+      _known -> nil
+    end
+  end
 
   defp test(fields) do
     case warning(fields) do
@@ -104,7 +125,11 @@ defmodule CastorEDC.Kino.ConnectionCell do
     case Enum.reject(secrets, fn {_key, secret} -> System.get_env("LB_" <> secret) end) do
       [] ->
         options = Enum.map(secrets, fn {key, secret} -> {key, System.get_env("LB_" <> secret)} end)
-        options = options ++ [base_url: server(fields)] ++ Application.get_env(:ex_castor_edc_kino, :client_options, [])
+
+        options =
+          options ++
+            [base_url: server(fields)] ++
+            time_zone(fields) ++ Application.get_env(:ex_castor_edc_kino, :client_options, [])
 
         case options |> CastorEDC.new() |> CastorEDC.Studies.list_studies() do
           {:ok, page} -> %{"ok" => true, "message" => "Connected: #{studies(length(page.entries))} available."}

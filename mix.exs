@@ -70,6 +70,7 @@ defmodule CastorEDC.Kino.MixProject do
     [
       castor_edc(),
       {:kino, "~> 0.19"},
+      {:tz, "~> 0.28"},
       {:excoveralls, "~> 0.18.5", only: :test},
       {:styler, "~> 1.12", only: [:dev, :test], runtime: false},
       {:credo, "~> 1.7.19", only: [:dev, :test], runtime: false},
