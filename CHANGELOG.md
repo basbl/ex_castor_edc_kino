@@ -4,6 +4,17 @@ All notable changes to this project are documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.2.0] - 2026-11-27
+
+### Added
+
+- The connection smart cell takes the time zone of a server of your own, which the API's times without a zone are in, and passes it to `CastorEDC.new/1` as `:time_zone`; it warns about a zone it doesn't know.
+  Castor EDC's own servers don't need one, as the client knows their zones.
+
+### Changed
+
+- Builds on ex_castor_edc 1.0 (`~> 1.0`) instead of its release candidate.
+
 ## [0.1.0] - 2026-10-15
 
 ### Added
@@ -22,4 +33,5 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 - An export download smart cell: it lists a study's existing exports, newest first, and downloads the one picked, in memory or into a directory.
   It never queues an export.
 
+[0.2.0]: https://hex.pm/packages/ex_castor_edc_kino/0.2.0
 [0.1.0]: https://hex.pm/packages/ex_castor_edc_kino/0.1.0

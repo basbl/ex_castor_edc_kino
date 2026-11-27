@@ -52,6 +52,48 @@ defmodule CastorEDC.Kino.ConnectionCellTest do
     )
   end
 
+  test "gives another server's time zone" do
+    {kino, _source} =
+      start_smart_cell!(ConnectionCell, %{"server" => "custom", "custom_server" => "https://edc.example.org"})
+
+    push_event(kino, "update_field", %{"field" => "time_zone", "value" => " Europe/Amsterdam "})
+
+    assert_smart_cell_update(
+      kino,
+      %{"time_zone" => " Europe/Amsterdam "},
+      """
+      client =
+        CastorEDC.new(
+          client_id: System.fetch_env!("LB_CASTOR_EDC_CLIENT_ID"),
+          client_secret: System.fetch_env!("LB_CASTOR_EDC_CLIENT_SECRET"),
+          base_url: "https://edc.example.org",
+          time_zone: "Europe/Amsterdam"
+        )\
+      """
+    )
+  end
+
+  test "leaves the time zone out for Castor EDC's own servers, which the client knows" do
+    {_kino, source} =
+      start_smart_cell!(ConnectionCell, %{"server" => "https://us.castoredc.com", "time_zone" => "Asia/Tokyo"})
+
+    refute source =~ "time_zone"
+  end
+
+  test "warns about a time zone it doesn't know" do
+    {kino, _source} =
+      start_smart_cell!(ConnectionCell, %{"server" => "custom", "custom_server" => "https://edc.example.org"})
+
+    push_event(kino, "update_field", %{"field" => "time_zone", "value" => "Europe/Amsterdan"})
+
+    assert_broadcast_event(kino, "update", %{
+      "warning" => "Europe/Amsterdan isn't a time zone; give one such as Europe/Amsterdam."
+    })
+
+    push_event(kino, "update_field", %{"field" => "time_zone", "value" => "Europe/Amsterdam"})
+    assert_broadcast_event(kino, "update", %{"warning" => nil})
+  end
+
   test "keeps the variable name when the new one isn't valid" do
     {kino, _source} = start_smart_cell!(ConnectionCell, %{"variable" => "castor"})
     push_event(kino, "update_field", %{"field" => "variable", "value" => "1 bad"})

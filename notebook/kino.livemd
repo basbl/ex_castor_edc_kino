@@ -7,7 +7,7 @@ kino = System.get_env("CASTOR_EDC_KINO_PATH")
 core = System.get_env("CASTOR_EDC_PATH")
 
 Mix.install(
-  [if(kino, do: {:ex_castor_edc_kino, path: kino}, else: {:ex_castor_edc_kino, "~> 0.1.0"})] ++
+  [if(kino, do: {:ex_castor_edc_kino, path: kino}, else: {:ex_castor_edc_kino, "~> 0.2.0"})] ++
     if(core, do: [{:ex_castor_edc, path: core, override: true}], else: [])
 )
 ```
@@ -24,6 +24,7 @@ The connection cell reads them from the secrets, so they never appear in the not
 ## Connecting
 
 Pick the server your studies are on, and test the connection.
+For a server of your own, also give its time zone, such as `Europe/Amsterdam`: the API's times without one are in it.
 
 <!-- livebook:{"attrs":"eyJ2YXJpYWJsZSI6ImNsaWVudCIsInNlcnZlciI6Imh0dHBzOi8vZGF0YS5jYXN0b3JlZGMuY29tIiwiY3VzdG9tX3NlcnZlciI6IiIsImF1dGgiOiJjcmVkZW50aWFscyIsImNsaWVudF9pZF9zZWNyZXQiOiJDQVNUT1JfRURDX0NMSUVOVF9JRCIsImNsaWVudF9zZWNyZXRfc2VjcmV0IjoiQ0FTVE9SX0VEQ19DTElFTlRfU0VDUkVUIiwiYWNjZXNzX3Rva2VuX3NlY3JldCI6IkNBU1RPUl9FRENfQUNDRVNTX1RPS0VOIn0","chunks":null,"kind":"Elixir.CastorEDC.Kino.ConnectionCell","livebook_object":"smart_cell"} -->
 

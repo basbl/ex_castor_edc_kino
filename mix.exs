@@ -1,7 +1,7 @@
 defmodule CastorEDC.Kino.MixProject do
   use Mix.Project
 
-  @version "0.1.0"
+  @version "0.2.0"
   @source_url "https://github.com/basbl/ex_castor_edc_kino"
 
   def project do
@@ -70,6 +70,7 @@ defmodule CastorEDC.Kino.MixProject do
     [
       castor_edc(),
       {:kino, "~> 0.19"},
+      {:tz, "~> 0.28"},
       {:excoveralls, "~> 0.18.5", only: :test},
       {:styler, "~> 1.12", only: [:dev, :test], runtime: false},
       {:credo, "~> 1.7.19", only: [:dev, :test], runtime: false},
@@ -83,7 +84,7 @@ defmodule CastorEDC.Kino.MixProject do
   # together; without it, the package builds on the released core.
   defp castor_edc do
     case System.get_env("CASTOR_EDC_PATH") do
-      blank when blank in [nil, ""] -> {:ex_castor_edc, "~> 1.0.0-rc.1"}
+      blank when blank in [nil, ""] -> {:ex_castor_edc, "~> 1.0"}
       path -> {:ex_castor_edc, path: path}
     end
   end
